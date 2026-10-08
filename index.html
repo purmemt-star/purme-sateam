@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Vimeo 진도 PoC · 푸르메 직원교육</title>
+<link rel="icon" href="assets/purme-logo.png">
+<link rel="stylesheet" href="poc.css">
+</head>
+<body>
+<header class="top">
+  <img src="assets/purme-logo.png" alt="푸르메재단 넥슨어린이재활병원" class="logo">
+  <span class="svc">직원교육</span>
+  <span class="tag">기술 검증(PoC)</span>
+  <span class="host">현재 도메인 <code id="host"></code></span>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <h1>Vimeo 진도 PoC</h1>
+    <p>영상 1개로 LMS의 핵심 규칙을 시험합니다: 실제 본 구간만 진도로 쌓이는지, 첫 학습 중 앞으로 건너뛰기가 막히는지, 다시 열었을 때 이어지는지, 80%에서 평가가 열리는지. 기록은 이 브라우저에만 저장됩니다(서버 저장 대신).</p>
+  </section>
+
+  <form id="loadForm" class="load">
+    <label for="videoInput">Vimeo 영상 링크 또는 ID</label>
+    <div class="row">
+      <input id="videoInput" type="text" inputmode="url" autocomplete="off" placeholder="예: https://vimeo.com/123456789 또는 123456789/abcdef">
+      <button type="submit" class="btn primary">불러오기</button>
+    </div>
+    <p class="hint">비공개 링크(뒤에 해시가 붙은 주소)도 넣을 수 있습니다. 영상 ID는 이 저장소에 저장하지 않습니다. 주소 뒤에 <code>?v=영상ID</code>를 붙여 바로 열 수도 있습니다.</p>
+  </form>
+
+  <div id="offline" class="banner" role="alert" hidden>
+    <strong>인터넷 연결이 끊겼습니다.</strong> 시청 기록은 이 기기에 보관 중이며, 연결되면 자동으로 저장합니다.
+  </div>
+
+  <div id="stage" class="stage" hidden>
+    <div class="player-col">
+      <div class="player-box"><div id="player"></div></div>
+      <p class="rule" id="ruleText">첫 학습 중에는 앞으로 건너뛸 수 없고 재생속도가 1.0x로 고정됩니다.</p>
+
+      <h2 class="h2">시청 구간</h2>
+      <div class="bar" aria-hidden="true"><div id="segBar"></div><span id="headMark" class="mark"></span></div>
+      <p class="sub">진한 부분이 실제로 본 구간입니다. 세로선은 현재 위치입니다.</p>
+    </div>
+
+    <aside class="stats">
+      <div class="card big">
+        <span class="label">시청률 (고유 구간 기준)</span>
+        <strong id="pct">0%</strong>
+        <div class="meter"><span id="pctBar"></span></div>
+        <span class="sub" id="pctSub">기준 80%</span>
+      </div>
+      <div class="card">
+        <span class="label">평가 응시</span>
+        <strong id="quizState">아직 불가</strong>
+      </div>
+      <dl class="kv">
+        <dt>영상 길이</dt><dd id="dur">–</dd>
+        <dt>본 시간 합계</dt><dd id="watched">–</dd>
+        <dt>최대 도달 지점</dt><dd id="maxReached">–</dd>
+        <dt>저장된 이어보기 위치</dt><dd id="resumeAt">–</dd>
+        <dt>건너뛰기 차단</dt><dd id="skipCount">0회</dd>
+        <dt>속도 변경 차단</dt><dd id="rateCount">0회</dd>
+        <dt>마지막 저장</dt><dd id="lastSave">–</dd>
+        <dt>대기 중인 저장</dt><dd id="queue">0건</dd>
+      </dl>
+      <div class="actions">
+        <button type="button" class="btn" id="btnSave">지금 저장</button>
+        <button type="button" class="btn" id="btnReload">새로고침 후 이어보기 시험</button>
+        <button type="button" class="btn danger" id="btnReset">이 영상 기록 초기화</button>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel" id="logPanel" hidden>
+    <div class="panel-head">
+      <h2 class="h2">이벤트 기록</h2>
+      <button type="button" class="btn small" id="btnCopy">결과 복사</button>
+    </div>
+    <ol id="log" class="log"></ol>
+  </section>
+
+  <section class="panel">
+    <h2 class="h2">점검표</h2>
+    <p class="sub">기기·브라우저마다 같은 순서로 시험하고 결과를 체크합니다. 체크 상태는 이 브라우저에 저장됩니다.</p>
+    <div class="env">
+      <label for="envSel">시험 환경</label>
+      <select id="envSel">
+        <option>PC · Chrome</option>
+        <option>PC · Edge</option>
+        <option>가로형 태블릿 · Samsung Internet</option>
+        <option>iPad · Safari</option>
+      </select>
+    </div>
+    <ul id="checks" class="checks"></ul>
+  </section>
+</main>
+
+<footer class="foot">PoC 전용 페이지입니다. 실제 LMS에서는 진도를 서버(Supabase)에 저장하고 80% 판정도 서버에서 합니다.</footer>
+
+<script src="https://player.vimeo.com/api/player.js"></script>
+<script src="poc.js"></script>
+</body>
+</html>
